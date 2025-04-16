@@ -1,3 +1,6 @@
+from textnode import TextType, TextNode
+
+
 class HTMLNode:
     def __init__(self, tag=None, value=None, children=None, props=None):
         self.tag = tag
@@ -61,3 +64,29 @@ class ParentNode(HTMLNode):
             html_parts.append(child.to_html())
 
         return f"<{self.tag}>{''.join(html_parts)}</{self.tag}>"
+
+
+def text_node_to_html_node(text_node):
+    if not isinstance(text_node, TextNode):
+        raise ValueError("TextNode should be provided as input")
+
+    match text_node.text_type:
+        case TextType.TEXT:
+            return LeafNode(tag=None, value=text_node.text)
+        case TextType.BOLD:
+            return LeafNode("b", text_node.text)
+        case TextType.ITALIC:
+            return LeafNode("i", text_node.text)
+        case TextType.CODE:
+            return LeafNode("code", text_node.text)
+        case TextType.LINK:
+            return LeafNode("a", value=text_node.text, 
+                            props={"href": text_node.url})
+        case TextType.IMAGES:
+            return LeafNode(
+                tag="img",
+                value="",
+                props={"src": text_node.url, "alt": text_node.text}
+                )
+        case _:
+            raise ValueError("Unsupported TextType")
